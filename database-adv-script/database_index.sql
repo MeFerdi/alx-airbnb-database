@@ -1,7 +1,8 @@
 -- Database Indexing for Performance Optimization
+-- This file contains CREATE INDEX commands for improving query performance
 
 -- Indexes for User table
--- Email is already indexed in the schema, but we can add more strategic indexes
+-- Email is already indexed in the schema, but let's add more strategic indexes
 
 -- Index for user role (frequently used in WHERE clauses)
 CREATE INDEX idx_user_role ON User(role);
@@ -89,3 +90,25 @@ CREATE INDEX idx_message_sent_at ON Message(sent_at);
 
 -- Composite index for conversation threads
 CREATE INDEX idx_message_conversation ON Message(sender_id, recipient_id, sent_at);
+
+-- Performance Analysis Queries
+These queries can be used with EXPLAIN to test index effectiveness
+
+EXPLAIN SELECT * FROM Property WHERE location = 'New York' AND pricepernight BETWEEN 100 AND 300;
+
+ --Test query 2: User booking history with date range
+EXPLAIN SELECT * FROM Booking WHERE user_id = 'user123' AND start_date >= '2024-01-01' ORDER BY start_date;
+
+-- Test query 3: Property reviews with rating filter
+EXPLAIN SELECT * FROM Review WHERE property_id = 'prop123' AND rating >= 4 ORDER BY created_at DESC;
+
+-- Test query 4: Revenue analysis by date range
+EXPLAIN SELECT SUM(total_price) FROM Booking WHERE start_date BETWEEN '2024-01-01' AND '2024-12-31' AND status = 'confirmed';
+
+-- Test query 5: Complex join with multiple filters
+EXPLAIN SELECT p.name, AVG(r.rating), COUNT(b.booking_id) 
+FROM Property p 
+LEFT JOIN Review r ON p.property_id = r.property_id 
+LEFT JOIN Booking b ON p.property_id = b.property_id 
+WHERE p.location = 'San Francisco' AND p.pricepernight <= 200
+GROUP BY p.property_id, p.name;
